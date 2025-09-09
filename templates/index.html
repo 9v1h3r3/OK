@@ -2,51 +2,109 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>JERRY DON</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Jerry Panel - Hacker Neon</title>
   <style>
     body {
-      background: linear-gradient(135deg, #000000, #111111);
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
+      background: #000;
+      color: #0f0;
+      font-family: monospace;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 30px;
+      text-shadow: 0 0 15px #0f0, 0 0 30px #0f0;
     }
     .container {
       max-width: 380px;
-      margin-top: 40px;
-      padding: 25px;
-      border-radius: 20px;
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(15px);
-      box-shadow: 0 0 20px rgba(0,255,200,0.7);
+      margin: 40px auto;
+      background: rgba(0,255,0,0.05);
+      border: 1px solid #0f0;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px #0f0;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
     }
     .form-control {
-      background: transparent;
-      border: 1px solid #0ff;
-      color: white;
+      width: 100%;
+      margin: 8px 0;
+      padding: 8px;
+      background: #000;
+      border: 1px solid #0f0;
+      color: #0f0;
+      border-radius: 5px;
+      box-shadow: inset 0 0 10px #0f0;
     }
-    label { margin-top: 10px; }
-    h1 {
-      text-shadow: 0 0 15px cyan, 0 0 30px #0ff;
+    .form-control:focus {
+      outline: none;
+      border-color: #00ff99;
+      box-shadow: 0 0 15px #00ff99;
+    }
+    button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      background: black;
+      border: 1px solid #0f0;
+      color: #0f0;
+      font-weight: bold;
+      text-transform: uppercase;
+      border-radius: 5px;
+      box-shadow: 0 0 10px #0f0;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #0f0;
+      color: black;
+      box-shadow: 0 0 20px #0f0;
+    }
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 15px;
+      color: #0f0;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    a:hover {
+      color: black;
+      background: #0f0;
+      padding: 5px;
+      border-radius: 5px;
+      box-shadow: 0 0 15px #0f0;
     }
   </style>
 </head>
 <body>
-  <div class="text-center">
-    <h1 class="mt-4">💀 Jerry DON 💀</h1>
-  </div>
+  <h1>⚡ Jerry Panel ⚡</h1>
   <div class="container">
     <form method="post" enctype="multipart/form-data">
-      <label>Token File</label><input type="file" name="tokenFile" class="form-control" required>
-      <label>Thread/Inbox ID</label><input type="text" name="threadId" class="form-control" required>
-      <label>Name Prefix</label><input type="text" name="kidx" class="form-control" required>
-      <label>Delay (seconds)</label><input type="number" name="time" class="form-control" required>
-      <label>Text File</label><input type="file" name="txtFile" class="form-control" required>
-      <button type="submit" class="btn btn-info w-100 mt-3">🚀 Start Sending</button>
+      <label>Token File</label>
+      <input type="file" name="tokenFile" class="form-control" required>
+
+      <label>Thread/Inbox ID</label>
+      <input type="text" name="threadId" class="form-control" required>
+
+      <label>Name Prefix</label>
+      <input type="text" name="kidx" class="form-control" required>
+
+      <label>Delay (seconds)</label>
+      <input type="number" name="time" class="form-control" required>
+
+      <label>Text File</label>
+      <input type="file" name="txtFile" class="form-control" required>
+
+      <button type="submit">🚀 Start Sending</button>
     </form>
+
     <form method="post" action="/stop">
-      <button type="submit" class="btn btn-danger w-100 mt-3">⛔ Stop Sending</button>
+      <button type="submit">⛔ Stop Sending</button>
     </form>
-    <a href="/admin" class="btn btn-warning w-100 mt-3">⚡ Jerry Panel</a>
+
+    <a href="/admin">⚡ Jerry Panel Admin Login ⚡</a>
   </div>
 </body>
 </html>
