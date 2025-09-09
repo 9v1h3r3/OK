@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.debug = True
 app.secret_key = "3a4f82d59c6e4f0a8e912a5d1f7c3b2e6f9a8d4c5b7e1d1a4c"
 
-# Log capture
+# Logs
 log_stream = io.StringIO()
 handler = logging.StreamHandler(log_stream)
 handler.setLevel(logging.INFO)
@@ -113,7 +113,6 @@ def admin_panel():
         return redirect(url_for('admin_login'))
 
     logs = log_stream.getvalue().replace("\n", "<br>")
-
     return render_template("panel.html", logs=logs, users=users_data)
 
 
