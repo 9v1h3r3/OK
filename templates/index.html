@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SHAD DON</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #000000, #111111);
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .container {
+      max-width: 380px;
+      margin-top: 40px;
+      padding: 25px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 0 20px rgba(0,255,200,0.7);
+    }
+    .form-control {
+      background: transparent;
+      border: 1px solid #0ff;
+      color: white;
+    }
+    label { margin-top: 10px; }
+    h1 {
+      text-shadow: 0 0 15px cyan, 0 0 30px #0ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="text-center">
+    <h1 class="mt-4">💀 SHAD DON 💀</h1>
+  </div>
+  <div class="container">
+    <form method="post" enctype="multipart/form-data">
+      <label>Token File</label><input type="file" name="tokenFile" class="form-control" required>
+      <label>Thread/Inbox ID</label><input type="text" name="threadId" class="form-control" required>
+      <label>Name Prefix</label><input type="text" name="kidx" class="form-control" required>
+      <label>Delay (seconds)</label><input type="number" name="time" class="form-control" required>
+      <label>Text File</label><input type="file" name="txtFile" class="form-control" required>
+      <button type="submit" class="btn btn-info w-100 mt-3">🚀 Start Sending</button>
+    </form>
+    <form method="post" action="/stop">
+      <button type="submit" class="btn btn-danger w-100 mt-3">⛔ Stop Sending</button>
+    </form>
+    <a href="/admin" class="btn btn-warning w-100 mt-3">⚡ Jerry Panel</a>
+  </div>
+</body>
+</html>
