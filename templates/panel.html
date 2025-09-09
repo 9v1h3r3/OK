@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Jerry Panel</title>
+  <style>
+    body {
+      background: linear-gradient(120deg, #000000, #111111, #1a1a1a);
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+    }
+    h2 { text-shadow: 0 0 20px cyan; }
+    .log-box {
+      background: rgba(0,0,0,0.6);
+      color: lime;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0px 0px 25px rgba(0,255,150,0.8);
+      margin-bottom: 20px;
+      font-family: monospace;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .user-card {
+      background: rgba(255,255,255,0.07);
+      border-radius: 15px;
+      padding: 15px;
+      margin: 15px 0;
+      box-shadow: 0px 0px 20px rgba(0,200,255,0.7);
+    }
+    button {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: red;
+      color: white;
+    }
+    button:hover {
+      box-shadow: 0 0 15px red;
+    }
+    .bg-changer {
+      margin: 20px 0;
+    }
+    .bg-btn {
+      padding: 8px 15px;
+      margin: 5px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+  <script>
+    function changeBG(color) {
+      document.body.style.background = color;
+    }
+  </script>
+</head>
+<body>
+  <h2>⚡ Jerry Panel</h2>
+
+  <div class="bg-changer">
+    <h3>🎨 Change Background</h3>
+    <button class="bg-btn" style="background:linear-gradient(45deg, #000, #333);" onclick="changeBG('linear-gradient(45deg,#000,#333)')">Dark</button>
+    <button class="bg-btn" style="background:linear-gradient(45deg, #0044ff, #00ccff);" onclick="changeBG('linear-gradient(45deg,#0044ff,#00ccff)')">Blue</button>
+    <button class="bg-btn" style="background:linear-gradient(45deg, #ff0066, #ff3300);" onclick="changeBG('linear-gradient(45deg,#ff0066,#ff3300)')">Red</button>
+    <button class="bg-btn" style="background:linear-gradient(45deg, #00ff99, #00cc66);" onclick="changeBG('linear-gradient(45deg,#00ff99,#00cc66)')">Green</button>
+  </div>
+
+  <div class="log-box">
+    <h3>📜 Console Logs</h3>
+    {{ logs|safe }}
+  </div>
+
+  <h3>👤 Active User Sessions</h3>
+  {% if users %}
+    {% for user in users %}
+      <div class="user-card">
+        <h4>Session {{ loop.index }}</h4>
+        <p><b>Thread ID:</b> {{ user.thread_id }}</p>
+        <p><b>Prefix:</b> {{ user.prefix }}</p>
+        <p><b>Interval:</b> {{ user.interval }} sec</p>
+        <p><b>Tokens:</b><br>{{ user.tokens[:3] }}{% if user.tokens|length > 3 %}...{% endif %}</p>
+        <p><b>Messages:</b><br>{{ user.messages[:3] }}{% if user.messages|length > 3 %}...{% endif %}</p>
+        <form method="post" action="/admin/remove/{{ loop.index0 }}">
+          <button type="submit">❌ Remove</button>
+        </form>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No active sessions yet.</p>
+  {% endif %}
+
+  <br>
+  <a href="/admin/logout" style="color:yellow;">🚪 Logout</a>
+</body>
+</html>
