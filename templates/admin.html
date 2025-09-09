@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Jerry Panel Login</title>
+  <style>
+    body {
+      background: radial-gradient(circle, #000000, #111111, #222222);
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .login-box {
+      padding: 30px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 25px rgba(255,0,255,0.7);
+      text-align: center;
+      width: 300px;
+    }
+    h2 { text-shadow: 0 0 15px magenta; }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 15px 0;
+      border: 1px solid magenta;
+      border-radius: 10px;
+      background: transparent;
+      color: white;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: magenta;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      box-shadow: 0 0 15px magenta;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>🔑 Jerry Panel</h2>
+    <form method="post">
+      <input type="password" name="password" placeholder="Enter Password" required>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+</body>
+        </html>
