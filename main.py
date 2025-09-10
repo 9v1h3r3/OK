@@ -101,7 +101,7 @@ def stop_sending():
 def admin_login():
     if request.method == 'POST':
         password = request.form.get('password')
-        if password == "smarty07":
+        if password == "smart007":
             session['admin'] = True
             return redirect(url_for('admin_panel'))
     return render_template("admin.html")
