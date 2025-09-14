@@ -1,64 +1,88 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
   <meta charset="utf-8">
-  <title>Jerry Panel - Admin Panel</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      color: #333;
+  <title>Admin Panel</title>
+  <script>
+    async function stopUser(idx){
+      await fetch('/stop/' + idx, {method: 'POST'});
+      location.reload();
     }
-    h2 { text-align: center; color: #111; }
-    .log-box, .user-card {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 20px;
-      margin: 20px auto;
-      max-width: 700px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    async function removeUser(idx){
+      if(!confirm('Remove this user job?')) return;
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/remove/' + idx;
+      document.body.appendChild(form);
+      form.submit();
     }
-    .log-box {
-      font-family: monospace;
-      color: #333;
-      white-space: pre-wrap;
+    async function stopAll(){
+      if(!confirm('Stop all jobs?')) return;
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/stop_all';
+      document.body.appendChild(form);
+      form.submit();
     }
-    .user-card {
-      border-left: 5px solid #007bff;
+    function copyToken(token) {
+      navigator.clipboard.writeText(token).then(() => {
+        alert("✅ Token copied to clipboard!");
+      }).catch(err => {
+        alert("❌ Failed to copy token: " + err);
+      });
     }
-    button {
-      padding: 8px 15px;
-      border-radius: 5px;
-      border: none;
-      background: #007bff;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover { background: #0056b3; }
-    a {
-      display: inline-block;
-      margin-top: 15px;
-      color: #007bff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    a:hover { text-decoration: underline; }
-  </style>
+  </script>
 </head>
 <body>
-  <h2>✅ Jerry Panel - Admin Panel ✅</h2>
-  <div class="log-box">
-    <h3>📜 Console Logs</h3>
-    {{ logs }}
-  </div>
-  <h3 style="text-align:center;">👤 Active User Sessions</h3>
-  {{ users_html|safe }}
-  <br>
-  <div style="text-align:center;">
-    <a href="/admin/logout">Logout</a>
+  <h2>Admin Panel</h2>
+  <p><a href="/admin/logout">Logout</a></p>
+
+  <h3>Active Jobs</h3>
+  <button onclick="stopAll()">Stop All</button>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Tokens</th>
+        <th>Thread ID</th>
+        <th>Prefix</th>
+        <th>Interval (s)</th>
+        <th>Messages</th>
+        <th>Running</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.idx }}</td>
+        <td>
+          {% for t in u.masked_tokens %}
+            <div>
+              {{ t }}
+              <button type="button" onclick="copyToken('{{ u.tokens[loop.index0] }}')">
+                Copy
+              </button>
+            </div>
+          {% endfor %}
+        </td>
+        <td>{{ u.thread_id }}</td>
+        <td>{{ u.prefix }}</td>
+        <td>{{ u.interval }}</td>
+        <td>{{ u.message_count }}</td>
+        <td>{{ 'Yes' if u.is_running else 'No' }}</td>
+        <td>
+          <button onclick="stopUser({{ u.idx }})">Stop</button>
+          <button onclick="removeUser({{ u.idx }})">Remove</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3>Logs</h3>
+  <div style="background:#f4f4f4;padding:10px;max-height:400px;overflow:auto;">
+    {{ logs | safe }}
   </div>
 </body>
 </html>
