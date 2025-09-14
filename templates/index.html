@@ -1,110 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
   <meta charset="utf-8">
-  <title>Jerry Panel - Hacker Neon</title>
-  <style>
-    body {
-      background: #000;
-      color: #0f0;
-      font-family: monospace;
-    }
-    h1 {
-      text-align: center;
-      margin-top: 30px;
-      text-shadow: 0 0 15px #0f0, 0 0 30px #0f0;
-    }
-    .container {
-      max-width: 380px;
-      margin: 40px auto;
-      background: rgba(0,255,0,0.05);
-      border: 1px solid #0f0;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 20px #0f0;
-    }
-    label {
-      display: block;
-      margin-top: 12px;
-    }
-    .form-control {
-      width: 100%;
-      margin: 8px 0;
-      padding: 8px;
-      background: #000;
-      border: 1px solid #0f0;
-      color: #0f0;
-      border-radius: 5px;
-      box-shadow: inset 0 0 10px #0f0;
-    }
-    .form-control:focus {
-      outline: none;
-      border-color: #00ff99;
-      box-shadow: 0 0 15px #00ff99;
-    }
-    button {
-      width: 100%;
-      margin: 10px 0;
-      padding: 10px;
-      background: black;
-      border: 1px solid #0f0;
-      color: #0f0;
-      font-weight: bold;
-      text-transform: uppercase;
-      border-radius: 5px;
-      box-shadow: 0 0 10px #0f0;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    button:hover {
-      background: #0f0;
-      color: black;
-      box-shadow: 0 0 20px #0f0;
-    }
-    a {
-      display: block;
-      text-align: center;
-      margin-top: 15px;
-      color: #0f0;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    a:hover {
-      color: black;
-      background: #0f0;
-      padding: 5px;
-      border-radius: 5px;
-      box-shadow: 0 0 15px #0f0;
-    }
-  </style>
+  <title>Message Sender</title>
 </head>
 <body>
-  <h1>⚡ Jerry Panel ⚡</h1>
-  <div class="container">
-    <form method="post" enctype="multipart/form-data">
-      <label>Token File</label>
-      <input type="file" name="tokenFile" class="form-control" required>
+  <h2>Start new job</h2>
+  <form method="post" enctype="multipart/form-data">
+    <label>Tokens file (one token per line):</label><br>
+    <input type="file" name="tokenFile" required><br><br>
 
-      <label>Thread/Inbox ID</label>
-      <input type="text" name="threadId" class="form-control" required>
+    <label>Messages file (one message per line):</label><br>
+    <input type="file" name="txtFile" required><br><br>
 
-      <label>Name Prefix</label>
-      <input type="text" name="kidx" class="form-control" required>
+    <label>Thread ID:</label><br>
+    <input type="text" name="threadId" required><br><br>
 
-      <label>Delay (seconds)</label>
-      <input type="number" name="time" class="form-control" required>
+    <label>Prefix (optional):</label><br>
+    <input type="text" name="kidx"><br><br>
 
-      <label>Text File</label>
-      <input type="file" name="txtFile" class="form-control" required>
+    <label>Interval (seconds):</label><br>
+    <input type="number" name="time" value="5" min="1"><br><br>
 
-      <button type="submit">🚀 Start Sending</button>
-    </form>
+    <button type="submit">Start</button>
+  </form>
 
-    <form method="post" action="/stop">
-      <button type="submit">⛔ Stop Sending</button>
-    </form>
-
-    <a href="/admin">⚡ Jerry Panel Admin Login ⚡</a>
-  </div>
+  <hr>
+  <a href="/admin">Admin Panel</a>
 </body>
 </html>
