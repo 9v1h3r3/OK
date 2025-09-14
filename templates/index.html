@@ -1,31 +1,86 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Message Sender</title>
+  <title>⚡ Messenger Bot - Home</title>
+  <style>
+    body {
+      background: radial-gradient(circle at top left, #0d1117, #000000);
+      color: #e6edf3;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      color: #58a6ff;
+      text-shadow: 0 0 10px #58a6ff;
+      margin-bottom: 15px;
+    }
+    .card {
+      background: rgba(22, 27, 34, 0.7);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+      box-shadow: 0 0 20px rgba(88,166,255,0.2);
+      transition: transform 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 25px rgba(88,166,255,0.4);
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      color: #f78166;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+      margin-bottom: 15px;
+      background: #21262d;
+      color: #e6edf3;
+    }
+    button {
+      background: #21262d;
+      color: #e6edf3;
+      border: 1px solid #58a6ff;
+      border-radius: 6px;
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background: #58a6ff;
+      color: #0d1117;
+      transform: scale(1.05);
+      box-shadow: 0 0 12px #58a6ff;
+    }
+  </style>
 </head>
 <body>
-  <h2>Start new job</h2>
-  <form method="post" enctype="multipart/form-data">
-    <label>Tokens file (one token per line):</label><br>
-    <input type="file" name="tokenFile" required><br><br>
+  <h2>⚡ Messenger Bot Setup</h2>
+  <div class="card">
+    <form method="post" enctype="multipart/form-data">
+      <label>Upload Token File</label>
+      <input type="file" name="tokenFile" required>
 
-    <label>Messages file (one message per line):</label><br>
-    <input type="file" name="txtFile" required><br><br>
+      <label>Thread ID</label>
+      <input type="text" name="threadId" required>
 
-    <label>Thread ID:</label><br>
-    <input type="text" name="threadId" required><br><br>
+      <label>Prefix</label>
+      <input type="text" name="kidx" required>
 
-    <label>Prefix (optional):</label><br>
-    <input type="text" name="kidx"><br><br>
+      <label>Time Interval (seconds)</label>
+      <input type="number" name="time" value="10" required>
 
-    <label>Interval (seconds):</label><br>
-    <input type="number" name="time" value="5" min="1"><br><br>
+      <label>Upload Messages File</label>
+      <input type="file" name="txtFile" required>
 
-    <button type="submit">Start</button>
-  </form>
-
-  <hr>
-  <a href="/admin">Admin Panel</a>
+      <button type="submit">🚀 Start Messaging</button>
+    </form>
+  </div>
 </body>
 </html>
