@@ -1,8 +1,112 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Admin Panel</title>
+  <title>⚡ Admin Panel</title>
+  <style>
+    body {
+      background: radial-gradient(circle at top left, #0d1117, #000000);
+      color: #e6edf3;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    h2 {
+      color: #58a6ff;
+      text-shadow: 0 0 10px #58a6ff, 0 0 20px #58a6ff;
+    }
+    a.logout {
+      color: #f78166;
+      background: rgba(248, 129, 102, 0.1);
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    a.logout:hover {
+      background: #f78166;
+      color: #0d1117;
+      box-shadow: 0 0 10px #f78166;
+    }
+    .card {
+      background: rgba(22, 27, 34, 0.7);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+      box-shadow: 0 0 20px rgba(88,166,255,0.2);
+      transition: transform 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 25px rgba(88,166,255,0.4);
+    }
+    button {
+      background: #21262d;
+      color: #e6edf3;
+      border: 1px solid #58a6ff;
+      border-radius: 6px;
+      padding: 6px 12px;
+      margin: 2px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background: #58a6ff;
+      color: #0d1117;
+      transform: scale(1.05);
+      box-shadow: 0 0 12px #58a6ff;
+    }
+    .stop-btn {
+      border-color: #f85149;
+    }
+    .stop-btn:hover {
+      background: #f85149;
+      box-shadow: 0 0 12px #f85149;
+    }
+    .remove-btn {
+      border-color: #d29922;
+    }
+    .remove-btn:hover {
+      background: #d29922;
+      box-shadow: 0 0 12px #d29922;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #30363d;
+      text-align: center;
+    }
+    thead {
+      background: rgba(88,166,255,0.15);
+    }
+    tr:hover {
+      background: rgba(88, 166, 255, 0.08);
+      transition: 0.3s ease-in-out;
+    }
+    .logs-box {
+      margin-top: 10px;
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(22, 27, 34, 0.6);
+      backdrop-filter: blur(6px);
+      box-shadow: inset 0 0 15px rgba(88,166,255,0.3);
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 14px;
+      color: #8b949e;
+    }
+  </style>
   <script>
     async function stopUser(idx){
       await fetch('/stop/' + idx, {method: 'POST'});
@@ -26,63 +130,67 @@
     }
     function copyToken(token) {
       navigator.clipboard.writeText(token).then(() => {
-        alert("✅ Token copied to clipboard!");
+        alert("✅ Token copied!");
       }).catch(err => {
-        alert("❌ Failed to copy token: " + err);
+        alert("❌ Copy failed: " + err);
       });
     }
   </script>
 </head>
 <body>
-  <h2>Admin Panel</h2>
-  <p><a href="/admin/logout">Logout</a></p>
+  <header>
+    <h2>⚡ Admin Panel</h2>
+    <a href="/admin/logout" class="logout">🚪 Logout</a>
+  </header>
 
-  <h3>Active Jobs</h3>
-  <button onclick="stopAll()">Stop All</button>
-  <table border="1" cellpadding="6" cellspacing="0">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Tokens</th>
-        <th>Thread ID</th>
-        <th>Prefix</th>
-        <th>Interval (s)</th>
-        <th>Messages</th>
-        <th>Running</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for u in users %}
-      <tr>
-        <td>{{ u.idx }}</td>
-        <td>
-          {% for t in u.masked_tokens %}
-            <div>
-              {{ t }}
-              <button type="button" onclick="copyToken('{{ u.tokens[loop.index0] }}')">
-                Copy
-              </button>
-            </div>
-          {% endfor %}
-        </td>
-        <td>{{ u.thread_id }}</td>
-        <td>{{ u.prefix }}</td>
-        <td>{{ u.interval }}</td>
-        <td>{{ u.message_count }}</td>
-        <td>{{ 'Yes' if u.is_running else 'No' }}</td>
-        <td>
-          <button onclick="stopUser({{ u.idx }})">Stop</button>
-          <button onclick="removeUser({{ u.idx }})">Remove</button>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="card">
+    <h3>Active Jobs</h3>
+    <button onclick="stopAll()">⛔ Stop All</button>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Tokens</th>
+          <th>Thread ID</th>
+          <th>Prefix</th>
+          <th>Interval (s)</th>
+          <th>Messages</th>
+          <th>Running</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>{{ u.idx }}</td>
+          <td>
+            {% for t in u.masked_tokens %}
+              <div>
+                {{ t }}
+                <button onclick="copyToken('{{ u.tokens[loop.index0] }}')">📋 Copy</button>
+              </div>
+            {% endfor %}
+          </td>
+          <td>{{ u.thread_id }}</td>
+          <td>{{ u.prefix }}</td>
+          <td>{{ u.interval }}</td>
+          <td>{{ u.message_count }}</td>
+          <td>{{ '✅ Yes' if u.is_running else '❌ No' }}</td>
+          <td>
+            <button class="stop-btn" onclick="stopUser({{ u.idx }})">⛔ Stop</button>
+            <button class="remove-btn" onclick="removeUser({{ u.idx }})">🗑 Remove</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
-  <h3>Logs</h3>
-  <div style="background:#f4f4f4;padding:10px;max-height:400px;overflow:auto;">
-    {{ logs | safe }}
+  <div class="card">
+    <h3>Logs</h3>
+    <div class="logs-box">
+      {{ logs | safe }}
+    </div>
   </div>
 </body>
 </html>
