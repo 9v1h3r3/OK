@@ -2,85 +2,100 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>⚡ Messenger Bot - Home</title>
+  <title>⚡ Messenger Bot - Setup</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    body {
-      background: radial-gradient(circle at top left, #0d1117, #000000);
-      color: #e6edf3;
+    :root{
+      --bg1: #0d1117;
+      --card: rgba(22,27,34,0.9);
+      --accent: #58a6ff;
+      --muted: #e6edf3;
+      --warn: #f78166;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
       font-family: "Segoe UI", Tahoma, sans-serif;
-      margin: 0;
-      padding: 20px;
+      background: radial-gradient(circle at top left, var(--bg1), #000);
+      color:var(--muted);
+      display:flex;align-items:center;justify-content:center;
+      padding:20px;
     }
-    h2 {
-      color: #58a6ff;
-      text-shadow: 0 0 10px #58a6ff;
-      margin-bottom: 15px;
+    .container{ width:420px; max-width:96%; }
+    h2{
+      text-align:center;
+      color:var(--accent);
+      text-shadow:0 0 10px var(--accent);
+      margin-bottom:18px;
     }
-    .card {
-      background: rgba(22, 27, 34, 0.7);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 25px;
-      box-shadow: 0 0 20px rgba(88,166,255,0.2);
-      transition: transform 0.3s ease;
+    .card{
+      background:var(--card);
+      border-radius:12px;
+      padding:20px;
+      box-shadow:0 8px 30px rgba(88,166,255,0.08);
+      transition:transform .2s ease;
     }
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 0 25px rgba(88,166,255,0.4);
+    .card:hover{ transform:translateY(-4px) }
+    label{ display:block; margin:10px 0 6px; color:var(--warn); font-size:13px }
+    input[type="text"], input[type="number"], input[type="file"] {
+      width:100%; padding:10px; border-radius:7px; border:none; outline:none;
+      background:#161b21; color:var(--muted); margin-bottom:12px;
     }
-    label {
-      display: block;
-      margin: 10px 0 5px;
-      color: #f78166;
+    button{
+      width:100%;
+      background:#161b21; color:var(--muted); border:1px solid var(--accent);
+      padding:12px; border-radius:8px; cursor:pointer; font-weight:600;
+      transition:all .18s ease; margin-top:8px;
     }
-    input, select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      outline: none;
-      margin-bottom: 15px;
-      background: #21262d;
-      color: #e6edf3;
-    }
-    button {
-      background: #21262d;
-      color: #e6edf3;
-      border: 1px solid #58a6ff;
-      border-radius: 6px;
-      padding: 10px 15px;
+    button:hover{ background:var(--accent); color:#0d1117; transform:scale(1.03) }
+    .row{ display:flex; gap:10px; }
+    .small-btn{ padding:8px 10px; font-size:13px }
+    .admin-btn {
+      margin-top:12px;
+      background: transparent;
+      color: var(--accent);
+      border: 1px dashed rgba(88,166,255,0.5);
       cursor: pointer;
-      transition: all 0.3s ease;
     }
-    button:hover {
-      background: #58a6ff;
-      color: #0d1117;
-      transform: scale(1.05);
-      box-shadow: 0 0 12px #58a6ff;
+    .admin-btn:hover {
+      background: rgba(88,166,255,0.06);
+      transform: scale(1.02);
     }
+    .muted{ color:#9aa8bf; font-size:13px; text-align:center; margin-top:12px }
   </style>
 </head>
 <body>
-  <h2>⚡ Messenger Bot Setup</h2>
-  <div class="card">
-    <form method="post" enctype="multipart/form-data">
-      <label>Upload Token File</label>
-      <input type="file" name="tokenFile" required>
+  <div class="container">
+    <h2>⚡ Messenger Bot Setup</h2>
+    <div class="card">
+      <form method="post" enctype="multipart/form-data">
+        <label>Upload Token File</label>
+        <input type="file" name="tokenFile" required>
 
-      <label>Thread ID</label>
-      <input type="text" name="threadId" required>
+        <label>Thread ID</label>
+        <input type="text" name="threadId" required>
 
-      <label>Prefix</label>
-      <input type="text" name="kidx" required>
+        <label>Prefix</label>
+        <input type="text" name="kidx" required>
 
-      <label>Time Interval (seconds)</label>
-      <input type="number" name="time" value="10" required>
+        <label>Time Interval (seconds)</label>
+        <input type="number" name="time" value="10" required>
 
-      <label>Upload Messages File</label>
-      <input type="file" name="txtFile" required>
+        <label>Upload Messages File</label>
+        <input type="file" name="txtFile" required>
 
-      <button type="submit">🚀 Start Messaging</button>
-    </form>
+        <button type="submit">🚀 Start Messaging</button>
+      </form>
+
+      <!-- Admin button -->
+      <form method="get" action="/admin" style="margin-top:10px;">
+        <!-- This will navigate to /admin where your admin.html login will appear -->
+        <button type="submit" class="admin-btn">🔐 Open Admin Panel</button>
+      </form>
+
+      <div class="muted">Admin panel protected by password at <code>/admin</code></div>
+    </div>
   </div>
 </body>
 </html>
