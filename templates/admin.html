@@ -1,28 +1,29 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Admin Login</title>
-  <style>
-    body {background:#0d1117; color:#e6edf3; font-family:sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0}
-    .card {background:#161b22; padding:25px; border-radius:12px; width:320px; box-shadow:0 0 15px rgba(88,166,255,0.3);}
-    h2 {color:#58a6ff; margin-bottom:15px; text-align:center}
-    input {width:100%; padding:10px; border:none; border-radius:6px; margin-bottom:15px; background:#21262d; color:#e6edf3;}
-    button {width:100%; padding:10px; border:1px solid #58a6ff; border-radius:6px; background:#21262d; color:#e6edf3; cursor:pointer; transition:0.2s;}
-    button:hover {background:#58a6ff; color:#0d1117;}
-    .error {color:#ff6b6b; margin-bottom:10px; text-align:center;}
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h2>🔑 Admin Login</h2>
-    {% if error %}
-      <div class="error">{{ error }}</div>
-    {% endif %}
-    <form method="post">
-      <input type="password" name="password" placeholder="Enter Password" required>
-      <button type="submit">Login</button>
-    </form>
-  </div>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-white text-center">
+                <h4 class="mb-0"><i class="fas fa-lock me-2"></i>Admin Login</h4>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Admin Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
