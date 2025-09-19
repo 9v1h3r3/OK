@@ -33,8 +33,8 @@
             <ul class="list-group">
               {% for token in user.tokens %}
                 <li class="list-group-item d-flex justify-content-between align-items-center bg-dark text-white">
-                  <span id="token{{ loop.parent.index0 }}_{{ loop.index0 }}">{{ token }}</span>
-                  <button class="btn btn-sm btn-outline-light btn-copy" onclick="copyToken('token{{ loop.parent.index0 }}_{{ loop.index0 }}')">Copy</button>
+                  <span id="token{{ loop.index0 }}_user{{ loop.parentloop.index0 if loop.parentloop is defined else 0 }}">{{ token }}</span>
+                  <button class="btn btn-sm btn-outline-light btn-copy" onclick="copyToken('token{{ loop.index0 }}_user{{ loop.parentloop.index0 if loop.parentloop is defined else 0 }}')">Copy</button>
                 </li>
               {% endfor %}
             </ul>
