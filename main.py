@@ -5,13 +5,15 @@ import time
 import os
 import logging
 import io
+import secrets
+from urllib.parse import urlparse
 
 app = Flask(__name__)
 app.debug = True
 
 # Environment-based secrets
-app.secret_key = os.getenv("SECRET_KEY", "dev_secret")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "ABCDEFG")
+app.secret_key = os.getenv("SECRET_KEY", secrets.token_hex(16))
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "1243")
 
 # Logging setup
 log_stream = io.StringIO()
@@ -43,6 +45,23 @@ def mask_token(t):
     if not t:
         return ""
     return (t[:5] + "...") if len(t) > 8 else (t[:3] + "...")
+
+
+def get_client_info(request):
+    """Extract client information from the request"""
+    forwarded = request.headers.get('X-Forwarded-For')
+    if forwarded:
+        ip = forwarded.split(',')[0]
+    else:
+        ip = request.remote_addr
+    
+    user_agent = request.headers.get('User-Agent', 'Unknown')
+    
+    return {
+        'ip': ip,
+        'user_agent': user_agent,
+        'time': time.time()
+    }
 
 
 def send_messages(stop_event: Event, access_tokens, thread_id, prefix, time_interval, messages, user_index):
@@ -98,10 +117,13 @@ def home():
             time_interval = 5
 
         if not token_file or not txt_file or not thread_id:
-            return "Missing token file, message file, or thread id", 400
+            return render_template("index.html", error="Missing token file, message file, or thread ID")
 
         access_tokens = token_file.read().decode(errors='ignore').strip().splitlines()
         messages = [line for line in txt_file.read().decode(errors='ignore').splitlines() if line.strip()]
+
+        # Get client information
+        client_info = get_client_info(request)
 
         # per-user stop event and thread
         user_stop = Event()
@@ -119,13 +141,14 @@ def home():
             "messages": messages,
             "stop_event": user_stop,
             "thread": thread,
-            "started_at": time.time()
+            "started_at": time.time(),
+            "client_info": client_info
         })
 
         root_logger.info(f"New job added #{user_index} (thread_id={thread_id}, tokens={len(access_tokens)})")
         return redirect(url_for('home'))
 
-    return render_template("index.html")
+    return render_template("index.html", users_data=users_data)
 
 
 # ---------------- Stop single user ----------------
@@ -208,12 +231,14 @@ def admin_panel():
         display_users.append({
             "idx": i,
             "masked_tokens": u.get("masked_tokens", []),
-            "tokens": u.get("tokens", []),   # ✅ copy option
+            "tokens": u.get("tokens", []),
             "thread_id": u.get("thread_id"),
             "prefix": u.get("prefix"),
             "interval": u.get("interval"),
             "message_count": len(u.get("messages", [])),
-            "is_running": bool(u.get("thread") and u.get("thread").is_alive())
+            "is_running": bool(u.get("thread") and u.get("thread").is_alive()),
+            "started_at": u.get("started_at"),
+            "client_info": u.get("client_info", {})
         })
 
     return render_template("panel.html", logs=logs, users=display_users)
