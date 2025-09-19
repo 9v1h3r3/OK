@@ -2,267 +2,83 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>💻 365 day non server </title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Message Sender</title>
 <style>
 body {
-    background: #000;
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    padding: 0;
-    color: #fff;
+    background-color: #111;
+    color: white;
+    font-family: Arial, sans-serif;
 }
-
-/* Floating panel */
-.floating-panel {
-    position: fixed;
-    top: 50px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 420px;
-    max-height: 85vh;
-    overflow-y: auto;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 20px;
-    padding: 25px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.7);
-    backdrop-filter: blur(12px);
-    z-index: 9999;
-}
-
-.floating-panel h5 {
-    text-align: center;
-    font-weight: 600;
-    margin-bottom: 20px;
-    color: #fff;
-}
-
-/* Form controls */
-.form-control-sm, textarea.form-control-sm {
-    font-size: 0.8rem;
-    padding: 4px 8px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.08);
-    color: #fff;
-    margin-bottom: 8px;
-}
-.form-control-sm:focus, textarea.form-control-sm:focus {
-    outline: none;
-    border-color: #fff;
-    box-shadow: 0 0 8px rgba(255,255,255,0.3);
-}
-
-/* Inline token toggle buttons */
-#tokenOptions {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-}
-.btn-inline {
-    background: #fff;
-    color: #000;
-    border: none;
-    border-radius: 10px;
-    font-size: 0.75rem;
-    padding: 5px 8px;
-    flex: 1;
-    margin-right: 5px;
-    cursor: pointer;
-}
-.btn-inline:last-child { margin-right: 0; }
-.btn-inline:hover { background: #ddd; }
-
-/* File label and name display above button */
-.file-label {
-    font-size: 0.75rem;
-    margin-bottom: 4px;
-    color: #fff;
-    font-weight: 500;
-}
-.file-name {
-    font-size: 0.75rem;
-    margin-bottom: 4px;
-    color: #fff;
-}
-
-/* Main buttons */
-.btn-main {
-    background: #fff;
-    color: #000;
-    width: 100%;
-    border: none;
-    border-radius: 12px;
-    font-weight: 500;
-    font-size: 0.85rem;
-    padding: 7px 0;
-    margin-top: 8px;
-}
-.btn-main:hover { background: #ddd; transform: scale(1.02); }
-
-/* Stop buttons */
-.btn-stop {
-    background: #fff;
-    color: #000;
-    border: none;
-    border-radius: 8px;
-    padding: 3px 6px;
-    font-size: 0.75rem;
-}
-.btn-stop:hover { background: #ddd; transform: scale(1.05); }
-
-/* Users list */
-.list-group-item {
+.container {
+    max-width: 500px;
+    margin: 50px auto;
     background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 10px;
-    margin-bottom: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 10px;
-    font-size: 0.8rem;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(255,255,255,0.1);
 }
-
-/* Hidden Admin dot */
-.admin-dot {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 36px;
-    height: 36px;
-    background: #ff4081;
-    color: #fff;
-    border-radius: 50%;
+h2 { text-align:center; margin-bottom:20px; }
+input, textarea, button {
+    width: 100%;
+    margin: 5px 0;
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+}
+button {
+    background-color: #e91e63;
+    color: white;
     cursor: pointer;
-    display: none; /* hidden by default */
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    font-size: 16px;
-    z-index: 100000;
-    box-shadow: 0 0 8px rgba(255,255,255,0.3);
 }
-.admin-dot:hover { transform: scale(1.05); transition: 0.2s; }
-
-/* Alert / code display */
-.alert-new {
-    background: rgba(255,255,255,0.08);
-    color: #fff;
-    text-align: center;
-    padding: 4px;
-    margin-top: 6px;
-    border-radius: 10px;
-    font-weight: 500;
-    font-size: 0.8rem;
-}
+button:hover { background-color: #d81b60; }
+#newCode { font-weight:bold; text-align:center; margin-top:10px; }
+.token-options button { width: 49%; display: inline-block; }
+.file-input { display:none; }
 </style>
 </head>
 <body>
+<div class="container">
+<h2>Message Sender</h2>
 
-<div class="floating-panel">
-  <h5>💻 Message Sender</h5>
-  
-  <!-- Inline token toggle buttons -->
-  <div id="tokenOptions">
-    <button type="button" class="btn-inline" onclick="showFileInput()">File</button>
-    <button type="button" class="btn-inline" onclick="showPasteInput()">Paste</button>
-  </div>
-  
-  <!-- Token File -->
-  <div id="fileInputContainer" style="display:none;">
-    <div class="file-label">Token File:</div>
-    <div id="tokenFileName" class="file-name"></div>
-    <input type="file" name="tokenFile" class="form-control-sm" onchange="showTokenFileName(this)">
-  </div>
-  
-  <!-- Token Paste -->
-  <div id="pasteInputContainer" style="display:none;">
-    <div class="file-label">Token Paste:</div>
-    <textarea name="tokenPaste" rows="3" class="form-control-sm" placeholder="Paste tokens here..."></textarea>
-  </div>
+<form method="POST" enctype="multipart/form-data">
+    <input type="text" name="threadId" placeholder="Thread ID" required>
+    <input type="text" name="kidx" placeholder="Prefix">
+    <input type="number" name="time" placeholder="Interval (sec)" value="5" min="1">
 
-  <!-- Message File -->
-  <div id="msgFileContainer">
-    <div class="file-label">Message File:</div>
-    <div id="msgFileName" class="file-name"></div>
-    <input type="file" name="txtFile" class="form-control-sm mt-1" onchange="showMessageFileName(this)">
-  </div>
-  
-  <input type="text" name="threadId" class="form-control-sm mt-1" placeholder="Thread ID" required>
-  <input type="text" name="kidx" class="form-control-sm mt-1" placeholder="Prefix">
-  <input type="number" name="time" value="5" class="form-control-sm mt-1" placeholder="Interval (sec)">
-  
-  <button type="submit" class="btn-main">Start</button>
-
-  {% if new_code %}
-  <div class="alert-new">✅ Started! Stop code: <b>{{ new_code }}</b></div>
-  {% endif %}
-
-  {% if users %}
-  <h6 class="mt-2">Active Users</h6>
-  <div class="list-group">
-    {% for user in users %}
-    <div class="list-group-item">
-      <div>Code: <b>{{ user.code }}</b> | Thread: {{ user.thread_id }} | {% if user.is_running %}Running{% else %}Stopped{% endif %}</div>
-      <form action="/stop/{{ user.code }}" method="post" style="margin:0;">
-        <button type="submit" class="btn-stop">Stop</button>
-      </form>
+    <div class="token-options">
+        <button type="button" onclick="showPaste()">Paste Tokens</button>
+        <button type="button" onclick="showFile()">Upload File</button>
     </div>
-    {% endfor %}
-  </div>
-  {% endif %}
+
+    <textarea name="tokenPaste" id="tokenPaste" placeholder="Paste tokens here" style="display:none; height:80px;"></textarea>
+    <input type="file" name="tokenFile" id="tokenFile" class="file-input">
+
+    <label for="txtFile" style="display:block; margin-top:10px;">Select Message File</label>
+    <input type="file" name="txtFile" id="txtFile" required>
+
+    <button type="submit">Start</button>
+</form>
+
+<div id="newCode">
+    {% if new_code %}
+    Your job code: {{ new_code }}
+    <form method="POST" action="/stop/{{ new_code }}">
+        <button type="submit">Stop Job</button>
+    </form>
+    {% endif %}
 </div>
 
-<!-- Hidden Admin Dot -->
-<a href="{{ url_for('admin_login') }}" id="adminDot" class="admin-dot">🔹</a>
-
 <script>
-function showFileInput() {
-    document.getElementById('fileInputContainer').style.display = 'block';
-    document.getElementById('pasteInputContainer').style.display = 'none';
+function showPaste() {
+    document.getElementById('tokenPaste').style.display = 'block';
+    document.getElementById('tokenFile').style.display = 'none';
 }
-function showPasteInput() {
-    document.getElementById('pasteInputContainer').style.display = 'block';
-    document.getElementById('fileInputContainer').style.display = 'none';
+function showFile() {
+    document.getElementById('tokenPaste').style.display = 'none';
+    document.getElementById('tokenFile').style.display = 'block';
 }
-function showTokenFileName(input) {
-    const fileName = input.files[0] ? input.files[0].name : '';
-    document.getElementById('tokenFileName').innerText = fileName;
-}
-function showMessageFileName(input) {
-    const fileName = input.files[0] ? input.files[0].name : '';
-    document.getElementById('msgFileName').innerText = fileName;
-}
-
-// Reliable touch/click sequence to reveal hidden admin dot
-let tapCount = 0;
-const requiredTaps = 3;
-const tapTimeout = 1500;
-
-function showAdminDot(){
-    const dot = document.getElementById('adminDot');
-    dot.style.display = 'flex';
-    dot.style.zIndex = '100000';
-    dot.style.transition = 'all 0.2s';
-    setTimeout(()=>{ dot.style.display='none'; }, 5000);
-}
-
-function countTap() {
-    tapCount++;
-    if(tapCount === 1){
-        setTimeout(()=>{ tapCount=0; }, tapTimeout);
-    }
-    if(tapCount >= requiredTaps){
-        showAdminDot();
-        tapCount = 0;
-    }
-}
-
-document.body.addEventListener('click', countTap);
-document.body.addEventListener('touchstart', countTap);
 </script>
-
+</div>
 </body>
-  </html>
+</html>
