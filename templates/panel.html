@@ -1,70 +1,173 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Admin Panel</title>
-  <style>
-    body {background:#0d1117; color:#e6edf3; font-family:sans-serif; margin:0; padding:20px;}
-    h2 {color:#58a6ff; text-align:center; margin-bottom:20px;}
-    .card {background:#161b22; padding:20px; border-radius:12px; margin-bottom:20px; box-shadow:0 0 15px rgba(88,166,255,0.3);}
-    .token {font-family:monospace; background:#21262d; padding:5px 8px; border-radius:6px;}
-    .btn {padding:6px 10px; margin:2px; border-radius:6px; border:1px solid #58a6ff; background:#21262d; color:#e6edf3; cursor:pointer;}
-    .btn:hover {background:#58a6ff; color:#0d1117;}
-    .running {color:#3bd671; font-weight:bold;}
-    .stopped {color:#ff6b6b; font-weight:bold;}
-    pre {background:#0d1117; border:1px solid #21262d; padding:10px; height:200px; overflow:auto; border-radius:8px;}
-  </style>
-  <script>
-    function copyToken(token) {
-      navigator.clipboard.writeText(token).then(()=>{
-        alert("Token copied!");
-      });
-    }
-  </script>
-</head>
-<body>
-  <h2>⚡ Messenger Bot - Admin Panel</h2>
+{% extends "base.html" %}
 
-  <div style="text-align:right; margin-bottom:15px;">
-    <form method="post" action="{{ url_for('stop_all') }}" style="display:inline;">
-      <button class="btn">⏹ Stop All</button>
-    </form>
-    <a href="{{ url_for('admin_logout') }}"><button class="btn">🚪 Logout</button></a>
-  </div>
-
-  {% for u in users %}
-    <div class="card">
-      <p><b>User #{{ u.idx }}</b> | Thread: <span class="token">{{ u.thread_id }}</span></p>
-      <p>Prefix: <span class="token">{{ u.prefix }}</span> | Interval: {{ u.interval }}s | Messages: {{ u.message_count }}</p>
-      <p>Status: 
-        {% if u.is_running %}
-          <span class="running">Running</span>
-        {% else %}
-          <span class="stopped">Stopped</span>
-        {% endif %}
-      </p>
-      <p>Masked Tokens:
-        {% for mt in u.masked_tokens %}
-          <span class="token">{{ mt }}</span>
-        {% endfor %}
-      </p>
-      <p>
-        <button class="btn" onclick="copyToken('{{ u.tokens|join(',') }}')">📋 Copy Full Token(s)</button>
-      </p>
-      <form method="post" action="{{ url_for('stop_user', idx=u.idx) }}" style="display:inline;">
-        <button class="btn">⏹ Stop</button>
-      </form>
-      <form method="post" action="{{ url_for('remove_user', idx=u.idx) }}" style="display:inline;">
-        <button class="btn">❌ Remove</button>
-      </form>
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-cogs me-2"></i>Admin Panel</h2>
+    <div>
+        <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-danger me-2">
+            <i class="fas fa-sign-out-alt me-1"></i>Logout
+        </a>
+        <form action="/stop_all" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-stop-circle me-1"></i>Stop All Jobs
+            </button>
+        </form>
     </div>
-  {% else %}
-    <p>No active users yet.</p>
-  {% endfor %}
+</div>
 
-  <div class="card">
-    <h3>📜 Logs</h3>
-    <pre>{{ logs|safe }}</pre>
-  </div>
-</body>
-</html>
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Active Jobs</h5>
+                <span class="badge bg-primary">{{ users|length }} jobs</span>
+            </div>
+            <div class="card-body">
+                {% if users %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Thread ID</th>
+                                <th>Tokens</th>
+                                <th>Messages</th>
+                                <th>Interval</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.idx }}</td>
+                                <td><code>{{ user.thread_id }}</code></td>
+                                <td>
+                                    <span class="badge bg-info">{{ user.masked_tokens|length }}</span>
+                                    <button class="btn btn-sm btn-outline-secondary ms-1" data-bs-toggle="collapse" data-bs-target="#tokens-{{ user.idx }}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                                <td>{{ user.message_count }}</td>
+                                <td>{{ user.interval }}s</td>
+                                <td>
+                                    {% if user.is_running %}
+                                    <span class="badge bg-success">Running</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Stopped</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form action="/remove/{{ user.idx }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr class="bg-light">
+                                <td colspan="7" class="p-0">
+                                    <div id="tokens-{{ user.idx }}" class="collapse">
+                                        <div class="p-3">
+                                            <h6>User Details:</h6>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <strong>IP Address:</strong> {{ user.client_info.ip }}<br>
+                                                    <strong>User Agent:</strong> {{ user.client_info.user_agent }}<br>
+                                                    <strong>Started:</strong> {{ user.started_at|float|timestamp }}<br>
+                                                </div>
+                                            </div>
+                                            
+                                            <h6>Access Tokens:</h6>
+                                            <div class="mb-3">
+                                                {% for token in user.tokens %}
+                                                <div class="input-group mb-2">
+                                                    <input type="text" class="form-control" value="{{ token }}" readonly id="token-{{ user.idx }}-{{ loop.index0 }}">
+                                                    <button class="btn btn-outline-primary copy-token" data-token-id="token-{{ user.idx }}-{{ loop.index0 }}">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center text-muted my-4">No active jobs</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="fas fa-terminal me-2"></i>Logs</h5>
+            </div>
+            <div class="card-body p-0">
+                <div id="logContainer" class="log-container">
+                    {{ logs|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Copy token functionality
+    document.querySelectorAll('.copy-token').forEach(button => {
+        button.addEventListener('click', function() {
+            const tokenId = this.getAttribute('data-token-id');
+            const tokenInput = document.getElementById(tokenId);
+            
+            tokenInput.select();
+            tokenInput.setSelectionRange(0, 99999); // For mobile devices
+            
+            navigator.clipboard.writeText(tokenInput.value).then(() => {
+                const originalHtml = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check"></i>';
+                
+                setTimeout(() => {
+                    this.innerHTML = originalHtml;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        });
+    });
+    
+    // Auto-scroll logs
+    function scrollLogs() {
+        const logContainer = document.getElementById('logContainer');
+        if (logContainer) {
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+    }
+    
+    // Refresh logs every 5 seconds
+    setInterval(function() {
+        fetch(window.location.href)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newLogs = doc.getElementById('logContainer');
+                if (newLogs) {
+                    document.getElementById('logContainer').innerHTML = newLogs.innerHTML;
+                    scrollLogs();
+                }
+            });
+    }, 5000);
+
+    document.addEventListener('DOMContentLoaded', function() {
+        scrollLogs();
+    });
+</script>
+{% endblock %}
