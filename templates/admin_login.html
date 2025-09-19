@@ -1,20 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Login</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { background:black; color:white; }
-    .container { max-width:300px; margin-top:100px; box-shadow:0 0 15px white; padding:20px; border-radius:20px; }
+    body {
+      background: #121212;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .login-box {
+      width: 350px;
+      padding: 30px;
+      background: #1e1e1e;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    }
+    .form-control {
+      background: transparent;
+      border: 1px solid #555;
+      color: white;
+    }
+    .form-control:focus {
+      background: transparent;
+      color: white;
+      border-color: #0d6efd;
+      box-shadow: none;
+    }
+    .btn-primary {
+      width: 100%;
+      border-radius: 10px;
+    }
+    .error {
+      color: #ff4d4d;
+      margin-top: 10px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h3 class="text-center">Admin Login</h3>
+  <div class="login-box">
+    <h3 class="text-center mb-4">🔐 Admin Login</h3>
     <form method="POST">
-      <input type="password" name="password" placeholder="Password" class="form-control mb-3" required>
-      <button type="submit" class="btn btn-light w-100">Login</button>
+      <div class="mb-3">
+        <label for="password" class="form-label">Enter Password</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
     </form>
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
   </div>
 </body>
 </html>
