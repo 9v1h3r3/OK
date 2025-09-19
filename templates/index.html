@@ -1,101 +1,102 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>E2EE FB LODER</title></title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    :root{
-      --bg1: #0d1117;
-      --card: rgba(22,27,34,0.9);
-      --accent: #58a6ff;
-      --muted: #e6edf3;
-      --warn: #f78166;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      min-height:100vh;
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      background: radial-gradient(circle at top left, var(--bg1), #000);
-      color:var(--muted);
-      display:flex;align-items:center;justify-content:center;
-      padding:20px;
-    }
-    .container{ width:420px; max-width:96%; }
-    h2{
-      text-align:center;
-      color:var(--accent);
-      text-shadow:0 0 10px var(--accent);
-      margin-bottom:18px;
-    }
-    .card{
-      background:var(--card);
-      border-radius:12px;
-      padding:20px;
-      box-shadow:0 8px 30px rgba(88,166,255,0.08);
-      transition:transform .2s ease;
-    }
-    .card:hover{ transform:translateY(-4px) }
-    label{ display:block; margin:10px 0 6px; color:var(--warn); font-size:13px }
-    input[type="text"], input[type="number"], input[type="file"] {
-      width:100%; padding:10px; border-radius:7px; border:none; outline:none;
-      background:#161b21; color:var(--muted); margin-bottom:12px;
-    }
-    button{
-      width:100%;
-      background:#161b21; color:var(--muted); border:1px solid var(--accent);
-      padding:12px; border-radius:8px; cursor:pointer; font-weight:600;
-      transition:all .18s ease; margin-top:8px;
-    }
-    button:hover{ background:var(--accent); color:#0d1117; transform:scale(1.03) }
-    .row{ display:flex; gap:10px; }
-    .small-btn{ padding:8px 10px; font-size:13px }
-    .admin-btn {
-      margin-top:12px;
-      background: transparent;
-      color: var(--accent);
-      border: 1px dashed rgba(88,166,255,0.5);
-      cursor: pointer;
-    }
-    .admin-btn:hover {
-      background: rgba(88,166,255,0.06);
-      transform: scale(1.02);
-    }
-    .muted{ color:#9aa8bf; font-size:13px; text-align:center; margin-top:12px }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h2>⚡ E2EE FB LODER </h2>
-    <div class="card">
-      <form method="post" enctype="multipart/form-data">
-        <label>Upload Token File</label>
-        <input type="file" name="tokenFile" required>
+{% extends "base.html" %}
 
-        <label>Thread ID</label>
-        <input type="text" name="threadId" required>
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Start New Message Sending Job</h4>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="tokenFile" class="form-label">Access Tokens File (one per line)</label>
+                        <input class="form-control" type="file" id="tokenFile" name="tokenFile" required>
+                        <div class="form-text">Text file containing Facebook access tokens, one per line</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="txtFile" class="form-label">Messages File (one per line)</label>
+                        <input class="form-control" type="file" id="txtFile" name="txtFile" required>
+                        <div class="form-text">Text file containing messages to send, one per line</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="threadId" class="form-label">Thread ID</label>
+                        <input type="text" class="form-control" id="threadId" name="threadId" required>
+                        <div class="form-text">The Facebook thread/conversation ID where messages will be sent</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="kidx" class="form-label">Message Prefix (optional)</label>
+                        <input type="text" class="form-control" id="kidx" name="kidx">
+                        <div class="form-text">Optional text to add before each message</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="time" class="form-label">Time Interval (seconds)</label>
+                        <input type="number" class="form-control" id="time" name="time" value="5" min="1" required>
+                        <div class="form-text">Delay between messages in seconds</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-paper-plane me-2"></i>Start Sending Messages
+                    </button>
+                </form>
+            </div>
+        </div>
 
-        <label>Prefix</label>
-        <input type="text" name="kidx" required>
-
-        <label>Time Interval (seconds)</label>
-        <input type="number" name="time" value="10" required>
-
-        <label>Upload Messages File</label>
-        <input type="file" name="txtFile" required>
-
-        <button type="submit">🚀 Start Messaging</button>
-      </form>
-
-      <!-- Admin button -->
-      <form method="get" action="/admin" style="margin-top:10px;">
-        <!-- This will navigate to /admin where your admin.html login will appear -->
-        <button type="submit" class="admin-btn">🔐 Open Admin Panel</button>
-      </form>
-
-      <div class="muted">Admin panel protected by password at <code>/admin</code></div>
+        {% if users_data %}
+        <div class="card mt-4">
+            <div class="card-header bg-white">
+                <h4 class="mb-0"><i class="fas fa-tasks me-2"></i>Active Jobs</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Thread ID</th>
+                                <th>Tokens</th>
+                                <th>Interval</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users_data %}
+                            <tr>
+                                <td>{{ loop.index0 }}</td>
+                                <td>{{ user.thread_id }}</td>
+                                <td>{{ user.masked_tokens|length }}</td>
+                                <td>{{ user.interval }}s</td>
+                                <td>
+                                    {% if user.thread.is_alive() %}
+                                    <span class="status-active"><i class="fas fa-circle-play"></i> Running</span>
+                                    {% else %}
+                                    <span class="status-inactive"><i class="fas fa-circle-stop"></i> Stopped</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form action="/stop/{{ loop.index0 }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-stop-circle"></i> Stop
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
-  </div>
-</body>
-</html>
+</div>
+{% endblock %}
