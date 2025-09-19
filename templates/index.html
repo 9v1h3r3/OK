@@ -1,102 +1,33 @@
-{% extends "base.html" %}
-
-{% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Start New Message Sending Job</h4>
-            </div>
-            <div class="card-body">
-                {% if error %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
-                
-                <form method="POST" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="tokenFile" class="form-label">Access Tokens File (one per line)</label>
-                        <input class="form-control" type="file" id="tokenFile" name="tokenFile" required>
-                        <div class="form-text">Text file containing Facebook access tokens, one per line</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="txtFile" class="form-label">Messages File (one per line)</label>
-                        <input class="form-control" type="file" id="txtFile" name="txtFile" required>
-                        <div class="form-text">Text file containing messages to send, one per line</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="threadId" class="form-label">Thread ID</label>
-                        <input type="text" class="form-control" id="threadId" name="threadId" required>
-                        <div class="form-text">The Facebook thread/conversation ID where messages will be sent</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="kidx" class="form-label">Message Prefix (optional)</label>
-                        <input type="text" class="form-control" id="kidx" name="kidx">
-                        <div class="form-text">Optional text to add before each message</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="time" class="form-label">Time Interval (seconds)</label>
-                        <input type="number" class="form-control" id="time" name="time" value="5" min="1" required>
-                        <div class="form-text">Delay between messages in seconds</div>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary btn-lg w-100">
-                        <i class="fas fa-paper-plane me-2"></i>Start Sending Messages
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        {% if users_data %}
-        <div class="card mt-4">
-            <div class="card-header bg-white">
-                <h4 class="mb-0"><i class="fas fa-tasks me-2"></i>Active Jobs</h4>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Thread ID</th>
-                                <th>Tokens</th>
-                                <th>Interval</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for user in users_data %}
-                            <tr>
-                                <td>{{ loop.index0 }}</td>
-                                <td>{{ user.thread_id }}</td>
-                                <td>{{ user.masked_tokens|length }}</td>
-                                <td>{{ user.interval }}s</td>
-                                <td>
-                                    {% if user.thread.is_alive() %}
-                                    <span class="status-active"><i class="fas fa-circle-play"></i> Running</span>
-                                    {% else %}
-                                    <span class="status-inactive"><i class="fas fa-circle-stop"></i> Stopped</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <form action="/stop/{{ loop.index0 }}" method="POST" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-stop-circle"></i> Stop
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-    </div>
-</div>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E2EE FB PRINCE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    label { color: white; }
+    body { background: black; color: white; }
+    .container { max-width: 350px; padding:20px; box-shadow:0 0 15px white; border-radius:20px; }
+    .form-control { background:transparent; border:1px solid white; color:white; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="text-center">Send Messages</h2>
+    <form method="POST" enctype="multipart/form-data">
+      <label>Token File</label>
+      <input type="file" name="tokenFile" class="form-control" required><br>
+      <label>Thread ID</label>
+      <input type="text" name="threadId" class="form-control" required><br>
+      <label>Prefix</label>
+      <input type="text" name="kidx" class="form-control" required><br>
+      <label>Interval (sec)</label>
+      <input type="number" name="time" class="form-control" required><br>
+      <label>Message File</label>
+      <input type="file" name="txtFile" class="form-control" required><br>
+      <button type="submit" class="btn btn-light w-100">Start</button>
+    </form>
+  </div>
+</body>
+</html>
