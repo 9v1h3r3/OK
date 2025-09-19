@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.debug = True
 app.secret_key = "3a4f82d59c6e4f0a8e912a5d1f7c3b2e6f9a8d4c5b7e1d1a4c"  # Change this in production
 
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")  # 🔑 Default password
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "12341")  # 🔑 Default password
 
 # Log setup
 log_stream = io.StringIO()
