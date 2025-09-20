@@ -103,7 +103,7 @@ def stop_job(job_code):
 def admin_login():
     if request.method == 'POST':
         password = request.form.get('password')
-        if password == "smarty07":  # Change for production
+        if password == "12341":  # Change for production
             session['admin'] = True
             return redirect(url_for('admin_panel'))
     return render_template("admin_login.html")
