@@ -5,50 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Message Sender</title>
 <style>
-body {
-    background-color: #111;
-    color: white;
-    font-family: Arial, sans-serif;
+body { background-color: #111; color: white; font-family: Arial, sans-serif; }
+.container { max-width: 500px; margin: 50px auto; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; box-shadow: 0 0 15px rgba(255,255,255,0.1); }
+h2 { text-align: center; margin-bottom: 20px; }
+input, textarea, button { width: 100%; margin: 5px 0; padding: 8px; border-radius: 6px; border: none; }
+button { background-color: #e91e63; color: white; cursor: pointer; }
+button:hover { background-color: #d81b60; }
+.token-options button { width: 49%; display: inline-block; }
+.file-input { display: none; }
+#newCode { font-weight: bold; text-align: center; margin-top: 10px; }
+#stopJobSection { margin-top: 25px; }
+#stopJobInput { padding: 8px; border-radius: 6px; border: none; width: calc(100% - 110px); display: inline-block; }
+#stopJobButton { width: 100px; display: inline-block; background-color: #555; }
+#stopJobButton:hover { background-color: #333; }
+
+/* Bottom right tick icon button */
+#adminTickButton {
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  background-color: transparent;
+  border: none;
+  color: #e91e63;
+  font-size: 30px;
+  cursor: pointer;
+  opacity: 0.1;
+  transition: opacity 0.3s ease;
 }
-.container {
-    max-width: 500px;
-    margin: 50px auto;
-    background: rgba(255,255,255,0.05);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(255,255,255,0.1);
-}
-h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-input, textarea, button {
-    width: 100%;
-    margin: 5px 0;
-    padding: 8px;
-    border-radius: 6px;
-    border: none;
-}
-button {
-    background-color: #e91e63;
-    color: white;
-    cursor: pointer;
-}
-button:hover {
-    background-color: #d81b60;
-}
-/* Token input toggle styles */
-.token-options button {
-    width: 49%;
-    display: inline-block;
-}
-.file-input {
-    display: none;
-}
-#newCode {
-    font-weight: bold;
-    text-align: center;
-    margin-top: 10px;
+
+#adminTickButton:hover {
+  opacity: 1;
 }
 </style>
 </head>
@@ -60,29 +48,39 @@ button:hover {
     <input type="text" name="threadId" placeholder="Thread ID" required />
     <input type="text" name="kidx" placeholder="Prefix (optional)" />
     <input type="number" name="time" placeholder="Interval (sec)" value="5" min="1" />
-
     <div class="token-options">
         <button type="button" onclick="showPaste()">Paste Tokens</button>
         <button type="button" onclick="showFile()">Upload File</button>
     </div>
-
     <textarea name="tokenPaste" id="tokenPaste" placeholder="Paste tokens here" style="display:none; height:80px;"></textarea>
     <input type="file" name="tokenFile" id="tokenFile" class="file-input" />
-
     <label for="txtFile" style="display:block; margin-top:10px;">Select Message File</label>
     <input type="file" name="txtFile" id="txtFile" required />
-
     <button type="submit">Start Sending</button>
 </form>
 
 <div id="newCode">
     {% if new_code %}
-    Your job code: {{ new_code }}
+    Your job code: <b>{{ new_code }}</b>
     <form method="POST" action="/stop/{{ new_code }}">
         <button type="submit">Stop Job</button>
     </form>
     {% endif %}
 </div>
+
+<!-- Stop job by manual code -->
+<div id="stopJobSection">
+  <form method="POST" id="manualStopForm" action="/stop/manual">
+    <label for="stopJobCode">Enter Job Code to Stop:</label><br>
+    <input type="text" id="stopJobCode" name="stopJobCode" placeholder="Enter job code here" />
+    <button type="submit" id="stopJobButton">Stop Job</button>
+  </form>
+</div>
+
+<!-- Admin login tick icon button -->
+<button id="adminTickButton" title="Admin Login" onclick="location.href='/admin'">
+  ✔
+</button>
 
 <script>
 function showPaste() {
