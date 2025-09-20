@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Message Sender</title>
 <style>
 body {
@@ -18,7 +18,10 @@ body {
     border-radius: 12px;
     box-shadow: 0 0 15px rgba(255,255,255,0.1);
 }
-h2 { text-align:center; margin-bottom:20px; }
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
 input, textarea, button {
     width: 100%;
     margin: 5px 0;
@@ -31,10 +34,22 @@ button {
     color: white;
     cursor: pointer;
 }
-button:hover { background-color: #d81b60; }
-#newCode { font-weight:bold; text-align:center; margin-top:10px; }
-.token-options button { width: 49%; display: inline-block; }
-.file-input { display:none; }
+button:hover {
+    background-color: #d81b60;
+}
+/* Token input toggle styles */
+.token-options button {
+    width: 49%;
+    display: inline-block;
+}
+.file-input {
+    display: none;
+}
+#newCode {
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
+}
 </style>
 </head>
 <body>
@@ -42,9 +57,9 @@ button:hover { background-color: #d81b60; }
 <h2>Message Sender</h2>
 
 <form method="POST" enctype="multipart/form-data">
-    <input type="text" name="threadId" placeholder="Thread ID" required>
-    <input type="text" name="kidx" placeholder="Prefix">
-    <input type="number" name="time" placeholder="Interval (sec)" value="5" min="1">
+    <input type="text" name="threadId" placeholder="Thread ID" required />
+    <input type="text" name="kidx" placeholder="Prefix (optional)" />
+    <input type="number" name="time" placeholder="Interval (sec)" value="5" min="1" />
 
     <div class="token-options">
         <button type="button" onclick="showPaste()">Paste Tokens</button>
@@ -52,12 +67,12 @@ button:hover { background-color: #d81b60; }
     </div>
 
     <textarea name="tokenPaste" id="tokenPaste" placeholder="Paste tokens here" style="display:none; height:80px;"></textarea>
-    <input type="file" name="tokenFile" id="tokenFile" class="file-input">
+    <input type="file" name="tokenFile" id="tokenFile" class="file-input" />
 
     <label for="txtFile" style="display:block; margin-top:10px;">Select Message File</label>
-    <input type="file" name="txtFile" id="txtFile" required>
+    <input type="file" name="txtFile" id="txtFile" required />
 
-    <button type="submit">Start</button>
+    <button type="submit">Start Sending</button>
 </form>
 
 <div id="newCode">
