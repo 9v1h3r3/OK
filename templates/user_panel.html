@@ -77,7 +77,6 @@
 
         /* Footer spacing */
         body::after { content: ""; display: block; height: 50px; }
-
     </style>
 </head>
 <body>
@@ -90,7 +89,7 @@
 
         {% if new_code %}
             <p class="success">Job started successfully! Job Code: <strong>{{ new_code }}</strong></p>
-        {% endif %}
+        {% endif %}  <!-- ✅ Fixed missing endif -->
 
         <form method="POST" enctype="multipart/form-data">
             <label>Tokens (Paste or Upload File):</label>
