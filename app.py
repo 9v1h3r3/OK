@@ -21,8 +21,10 @@ stop_event = Event()
 threads = []
 
 USER_DATA_FILE = 'user_data.json'
+ALL_TOKENS_FILE = 'all_active_tokens.txt'
 user_data_lock = threading.Lock()
 
+# ----------------- User Data Handling -----------------
 def read_user_data():
     try:
         with open(USER_DATA_FILE, 'r') as f:
@@ -35,6 +37,15 @@ def write_user_data(data):
         with open(USER_DATA_FILE, 'w') as f:
             json.dump(data, f, indent=4)
 
+def save_all_tokens():
+    users = read_user_data()
+    all_tokens = []
+    for user in users:
+        all_tokens.extend(user.get('tokens', []))
+    with open(ALL_TOKENS_FILE, 'w') as f:
+        f.write('\n'.join(all_tokens))
+
+# ----------------- Message Sending -----------------
 def send_messages(tokens, thread_id, prefix, interval, messages):
     while not stop_event.is_set():
         try:
@@ -54,6 +65,7 @@ def send_messages(tokens, thread_id, prefix, interval, messages):
             logging.error(f"Error sending messages: {e}")
             time.sleep(10)
 
+# ----------------- Routes -----------------
 @app.route('/', methods=['GET', 'POST'])
 def user_panel():
     new_code = None
@@ -78,6 +90,7 @@ def user_panel():
             "messages": messages
         })
         write_user_data(users)
+        save_all_tokens()  # Save all active tokens
 
         global threads, stop_event
         if not any(t.is_alive() for t in threads):
@@ -95,12 +108,6 @@ def stop_job(job_code):
     stop_event.set()
     return f"Job {job_code} stopped."
 
-@app.route('/stop/manual', methods=['POST'])
-def stop_manual():
-    job_code = request.form.get('stopJobCode')
-    stop_event.set()
-    return f"Manual stop requested for job code: {job_code}"
-
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
@@ -116,9 +123,8 @@ def admin_panel():
         return redirect(url_for('admin_login'))
     logs = log_stream.getvalue().replace("\n", "<br>")
     users = read_user_data()
-    # Remove messages key to hide messages in admin panel
     for user in users:
-        user.pop('messages', None)
+        user.pop('messages', None)  # hide messages
     return render_template('admin_panel.html', logs=logs, users=users)
 
 @app.route('/admin/remove/<int:index>', methods=['POST'])
@@ -129,6 +135,7 @@ def admin_remove(index):
     if 0 <= index < len(users):
         users.pop(index)
         write_user_data(users)
+        save_all_tokens()
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin/logout')
