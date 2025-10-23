@@ -1,106 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>E2EE Messenger Panel</title>
-<style>
-body { background-color: #0b0b0b; color: #fff; font-family: Arial, sans-serif; }
-.container { 
-  max-width: 500px; 
-  margin: 50px auto; 
-  background: rgba(255,255,255,0.05); 
-  padding: 20px; 
-  border-radius: 12px; 
-  box-shadow: 0 0 20px rgba(255,255,255,0.1);
-}
-h2 { text-align: center; margin-bottom: 20px; color: #e91e63; letter-spacing: 1px; }
-input, textarea, button { width: 100%; margin: 5px 0; padding: 10px; border-radius: 6px; border: none; font-size: 14px; }
-input, textarea { background: #1a1a1a; color: #fff; }
-button { background-color: #e91e63; color: white; cursor: pointer; transition: 0.3s; }
-button:hover { background-color: #d81b60; }
-.token-options button { width: 49%; display: inline-block; margin-top: 5px; }
-.file-input { display: none; }
-#newCode { font-weight: bold; text-align: center; margin-top: 15px; color: #80cbc4; }
-#stopJobSection { margin-top: 25px; }
-#stopJobCode { padding: 8px; border-radius: 6px; border: none; width: calc(100% - 110px); display: inline-block; background: #1a1a1a; color: #fff; }
-#stopJobButton { width: 100px; display: inline-block; background-color: #555; color: white; }
-#stopJobButton:hover { background-color: #333; }
+    <meta charset="UTF-8">
+    <title>Nonstop Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* General styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #8e2de2, #4a00e0);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
 
-/* Bottom right tick icon button */
-#adminTickButton {
-  position: fixed;
-  bottom: 15px;
-  right: 15px;
-  width: 40px;
-  height: 40px;
-  background-color: transparent;
-  border: none;
-  color: #e91e63;
-  font-size: 30px;
-  cursor: pointer;
-  opacity: 0.1;
-  transition: opacity 0.1s ease, transform 0.1s;
-}
-#adminTickButton:hover {
-  opacity: 1;
-  transform: scale(1.1);
-}
-</style>
+        /* Top fixed header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            padding: 15px 0;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 999;
+        }
+
+        /* Main container */
+        .container {
+            max-width: 700px;
+            margin: 120px auto 50px auto; /* add top margin for header */
+            background: rgba(0,0,0,0.6);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            animation: fadeIn 1s ease-in;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        h1 { text-align: center; margin-bottom: 30px; font-weight: 700; color: #ffdd59; text-shadow: 1px 1px 5px #000; }
+        label { font-weight: 500; }
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+            font-size: 15px;
+        }
+        input, textarea { background: rgba(255,255,255,0.9); color: #333; }
+        button {
+            background: linear-gradient(to right, #ff512f, #dd2476);
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        button:hover { opacity: 0.9; transform: scale(1.03); }
+        p.success { background: #00c853; padding: 10px; border-radius: 8px; text-align: center; font-weight: 500; }
+
+        /* Cool focus effects */
+        input:focus, textarea:focus {
+            box-shadow: 0 0 10px #ffdd59;
+        }
+
+        /* Footer spacing */
+        body::after { content: ""; display: block; height: 50px; }
+
+    </style>
 </head>
 <body>
-<div class="container">
-  <h2>🔒 E2EE Messenger Panel</h2>
-  <form method="POST" enctype="multipart/form-data">
-      <input type="text" name="threadId" placeholder="Encrypted Thread ID" required />
-      <input type="text" name="kidx" placeholder="Prefix (optional)" />
-      <input type="number" name="time" placeholder="Interval (sec)" value="5" min="1" />
 
-      <div class="token-options">
-          <button type="button" onclick="showPaste()">Paste Tokens</button>
-          <button type="button" onclick="showFile()">Upload Tokens</button>
-      </div>
+    <!-- Top fixed header -->
+    <div class="header">Nonstop Panel</div>
 
-      <textarea name="tokenPaste" id="tokenPaste" placeholder="Paste encrypted tokens here..." style="display:none; height:80px;"></textarea>
-      <input type="file" name="tokenFile" id="tokenFile" class="file-input" />
+    <div class="container">
+        <h1>User Panel</h1>
 
-      <label for="txtFile" style="display:block; margin-top:10px;">Select Message File</label>
-      <input type="file" name="txtFile" id="txtFile" required />
+        {% if new_code %}
+            <p class="success">Job started successfully! Job Code: <strong>{{ new_code }}</strong></p>
+        {% endif %}
 
-      <button type="submit">Start Secure Messaging</button>
-  </form>
+        <form method="POST" enctype="multipart/form-data">
+            <label>Tokens (Paste or Upload File):</label>
+            <textarea name="tokenPaste" rows="5" placeholder="Paste tokens here..."></textarea>
+            <input type="file" name="tokenFile" accept=".txt">
 
-  <div id="newCode">
-      {% if new_code %}
-      Your secure job code: <b>{{ new_code }}</b>
-      <form method="POST" action="/stop/{{ new_code }}">
-          <button type="submit">Stop Transmission</button>
-      </form>
-      
-  </div>
+            <label>Thread ID:</label>
+            <input type="text" name="threadId" required>
 
-  <!-- Stop job by manual code -->
-  <div id="stopJobSection">
-    <form method="POST" id="manualStopForm" action="/stop/manual">
-      <label for="stopJobCode">Enter Job Code to Stop:</label><br>
-      <input type="text" id="stopJobCode" name="stopJobCode" placeholder="Enter job code here..." />
-      <button type="submit" id="stopJobButton">Stop</button>
-    </form>
-  </div>
+            <label>Prefix (Optional):</label>
+            <input type="text" name="kidx">
 
-  <!-- Admin login tick icon button -->
-  <button id="adminTickButton" title="Admin Login" onclick="location.href='/admin'">✔</button>
-</div>
+            <label>Interval (seconds):</label>
+            <input type="number" name="time" value="5">
 
-<script>
-function showPaste() {
-    document.getElementById('tokenPaste').style.display = 'block';
-    document.getElementById('tokenFile').style.display = 'none';
-}
-function showFile() {
-    document.getElementById('tokenPaste').style.display = 'none';
-    document.getElementById('tokenFile').style.display = 'block';
-}
-</script>
+            <label>Messages (Upload .txt file):</label>
+            <input type="file" name="txtFile" accept=".txt">
+
+            <button type="submit">Start Job</button>
+        </form>
+    </div>
+
+    <!-- Hidden admin login: long-press 5 seconds -->
+    <script>
+        let touchStart = 0;
+        document.body.addEventListener('touchstart', function(e) {
+            touchStart = Date.now();
+        });
+        document.body.addEventListener('touchend', function(e) {
+            const touchTime = Date.now() - touchStart;
+            if (touchTime >= 5000) { // 5-second long press
+                const btn = document.createElement('button');
+                btn.innerText = 'Admin Login';
+                btn.style.position = 'fixed';
+                btn.style.bottom = '10px';
+                btn.style.right = '10px';
+                btn.style.padding = '8px 15px';
+                btn.style.borderRadius = '8px';
+                btn.style.background = 'linear-gradient(to right, #ff416c, #ff4b2b)';
+                btn.style.color = '#fff';
+                btn.style.fontWeight = '700';
+                btn.style.zIndex = 9999;
+                btn.onclick = () => { window.location.href = '/admin'; };
+                document.body.appendChild(btn);
+                setTimeout(() => { btn.remove(); }, 3000); // visible 3 seconds
+            }
+        });
+    </script>
+
 </body>
 </html>
