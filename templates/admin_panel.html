@@ -7,13 +7,19 @@
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background: #f5f6fa;
-            color: #333;
+            background: linear-gradient(to right, #1e3c72, #2a5298);
+            color: #fff;
             margin: 0;
             padding: 20px;
         }
-        h1 { text-align: center; color: #222; }
-        a { text-decoration: none; color: #fff; }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ffdd59;
+            text-shadow: 1px 1px 5px #000;
+        }
+
         .logout-btn {
             float: right;
             background: #e74c3c;
@@ -21,22 +27,125 @@
             border-radius: 8px;
             font-weight: 500;
             margin-top: -50px;
+            text-decoration: none;
+            color: #fff;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin-bottom: 30px;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
+
         th, td {
             padding: 12px;
             text-align: left;
         }
-        th { background: linear-gradient(to right, #6a11cb, #2575fc); color: #fff; }
-        tr:nth-child(even) { background: #f1f1f1; }
-        tr:hover { background: #ddd; }
+
+        th {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: #fff;
+        }
+
+        tr:nth-child(even) { background: rgba(255,255,255,0.1); }
+        tr:hover { background: rgba(255,255,255,0.2); }
+
         button {
             padding: 5px 10px;
             border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .copy-btn {
+            background: #00c853;
+            color: #fff;
+        }
+
+        .copy-btn:hover { opacity: 0.8; }
+
+        .remove-btn {
+            background: #e53935;
+            color: #fff;
+        }
+
+        .remove-btn:hover { opacity: 0.8; }
+
+        .logs {
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 10px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        /* Scrollbar styling */
+        .logs::-webkit-scrollbar { width: 8px; }
+        .logs::-webkit-scrollbar-thumb { background: #ffdd59; border-radius: 4px; }
+        .logs::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body>
+
+    <a href="{{ url_for('admin_logout') }}" class="logout-btn">Logout</a>
+    <h1>Admin Panel</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Thread ID</th>
+                <th>Prefix</th>
+                <th>Interval</th>
+                <th>Tokens</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ user.thread_id }}</td>
+                <td>{{ user.prefix }}</td>
+                <td>{{ user.interval }}</td>
+                <td>{{ user.tokens | length }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('admin_remove', index=loop.index0) }}" style="display:inline;">
+                        <button class="remove-btn" type="submit">Remove</button>
+                    </form>
+                    <button class="copy-btn" onclick="copyTokens({{ loop.index0 }})">Copy Tokens</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Logs</h2>
+    <div class="logs" id="logs">{{ logs | safe }}</div>
+
+    <script>
+        const users = {{ users | tojson }};
+        function copyTokens(index) {
+            if(index >= users.length) return;
+            const tokens = users[index].tokens.join('\n');
+            navigator.clipboard.writeText(tokens).then(() => {
+                alert('Tokens copied to clipboard!');
+            }).catch(err => {
+                alert('Failed to copy tokens');
+            });
+        }
+
+        // Auto-scroll logs to bottom
+        const logsDiv = document.getElementById('logs');
+        logsDiv.scrollTop = logsDiv.scrollHeight;
+    </script>
+
+</body>
+</html>
